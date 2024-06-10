@@ -60,3 +60,5 @@
 - spring-boot-starter-validation - для валидации входных данных
 - okhttp - для передачи Http-запросов
 - gson - для десериализации полученных JSON-ов
+
+^_^
