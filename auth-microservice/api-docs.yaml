@@ -1,0 +1,194 @@
+openapi: 3.0.1
+info:
+  title: Сервис авторизации пользователя
+  version: 1.0.0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+security:
+- JWT токен: []
+tags:
+- name: Person Controller
+  description: Управляет пользователями
+paths:
+  /auth-microservice/v1/auth/register:
+    post:
+      tags:
+      - Person Controller
+      summary: Регистрация пользователя
+      description: Создает нового пользователя
+      operationId: registerUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersonRequestDto"
+        required: true
+      responses:
+        "500":
+          description: Server-side error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDto"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDto"
+        "201":
+          description: User successfully registered
+  /auth-microservice/v1/auth/login:
+    post:
+      tags:
+      - Person Controller
+      summary: Вход пользователя
+      description: Возвращает JWT токен аутентифицированному пользователю
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequestDto"
+        required: true
+      responses:
+        "500":
+          description: Internal server error
+          content: {}
+        "401":
+          description: User unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDto"
+        "200":
+          description: Request completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponseDto"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuthResponseDto"
+  /auth-microservice/v1/auth:
+    get:
+      tags:
+      - Person Controller
+      summary: Получение информации о пользователе
+      description: Возвращает данные об аутентифицированном пользователе
+      operationId: getUser
+      responses:
+        "500":
+          description: Server-side error
+          content: {}
+        "401":
+          description: User unauthorized
+        "200":
+          description: Request completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonResponseDto"
+components:
+  schemas:
+    PersonRequestDto:
+      required:
+      - email
+      - nickname
+      - password
+      type: object
+      properties:
+        nickname:
+          type: string
+          description: Имя пользователя
+          example: some_nickname
+        email:
+          type: string
+          description: Email пользователя
+          example: some_email@gmail.com
+        password:
+          maxLength: 2147483647
+          minLength: 8
+          pattern: "^[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]+$"
+          type: string
+          description: Пароль
+          writeOnly: true
+          example: some_password
+    ErrorDto:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Сообщение ошибки
+          example: Сообщение об ошибке
+    AuthRequestDto:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          description: Электронная почта пользователя
+          example: some_email@gmail.com
+        password:
+          maxLength: 2147483647
+          minLength: 8
+          pattern: "^[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]+$"
+          type: string
+          description: Пароль
+          example: some_password
+    AuthResponseDto:
+      required:
+      - token
+      type: object
+      properties:
+        token:
+          type: string
+          description: Сгенерированный JWT токен
+          example: am52cm52Z25pYWVyamlndmppZmp0bmh1YXJqaW92bnVlZml2bnJzZXViYWlmaml0
+    PersonResponseDto:
+      required:
+      - email
+      - id
+      - nickname
+      - password
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID пользователя в БД
+          format: int32
+          example: 1
+        nickname:
+          type: string
+          description: Имя пользователя
+          example: some_nickname
+        email:
+          type: string
+          description: Email пользователя
+          example: some_email@gmail.com
+        password:
+          minLength: 8
+          pattern: "^[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]+$"
+          type: string
+          description: Пароль
+          writeOnly: true
+          example: some_password
+        created:
+          type: string
+          description: Дата и время регистрации пользователя
+          format: date-time
+  securitySchemes:
+    JWT токен:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

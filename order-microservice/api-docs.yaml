@@ -1,0 +1,206 @@
+openapi: 3.0.1
+info:
+  title: Сервис продажи билетов
+  version: 1.0.0
+servers:
+- url: http://localhost:9090
+  description: Generated server url
+security:
+- JWT токен: []
+tags:
+- name: Station Controller
+  description: Управляет станциями
+- name: Order Controller
+  description: Управляет заказами
+paths:
+  /order-microservice/v1/station:
+    post:
+      tags:
+      - Station Controller
+      summary: Создание станции
+      description: Добавляет запись о новой станции в БД
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StationRequestDto"
+        required: true
+      responses:
+        "500":
+          description: Server-side error
+          content: {}
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ErrorDto"
+        "201":
+          description: Request completed successfully
+  /order-microservice/v1/order:
+    post:
+      tags:
+      - Order Controller
+      summary: Создание заказа
+      description: Создает новый заказ
+      operationId: create_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderRequestDto"
+        required: true
+      responses:
+        "500":
+          description: Server-side error
+          content: {}
+        "401":
+          description: User is not authorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDto"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ErrorDto"
+        "201":
+          description: Request completed successfully
+  /order-microservice/v1/order/{id}:
+    get:
+      tags:
+      - Order Controller
+      summary: Получение заказа по ID
+      description: Возвращает заказ по ID
+      operationId: get
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "500":
+          description: Server-side error
+          content: {}
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorDto"
+        "400":
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ErrorDto"
+        "200":
+          description: Request completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResponseDto"
+components:
+  schemas:
+    StationRequestDto:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: Название станции
+          example: station name
+    ErrorDto:
+      required:
+      - message
+      type: object
+      properties:
+        message:
+          type: string
+          description: Сообщение ошибки
+          example: Сообщение об ошибке
+    OrderRequestDto:
+      required:
+      - fromStationId
+      - toStationId
+      type: object
+      properties:
+        fromStationId:
+          type: integer
+          description: ID точки отправления
+          format: int32
+          example: 1
+        toStationId:
+          type: integer
+          description: ID точки прибытия
+          format: int32
+          example: 2
+    OrderResponseDto:
+      required:
+      - created
+      - from
+      - id
+      - status
+      - to
+      - userId
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID заказа
+          format: int32
+          example: 1
+        userId:
+          type: integer
+          description: ID заказчика
+          format: int32
+          example: 1
+        from:
+          $ref: "#/components/schemas/StationResponseDto"
+        to:
+          $ref: "#/components/schemas/StationResponseDto"
+        status:
+          type: string
+          description: Статус заказа
+          example: CHECK
+          enum:
+          - CHECK
+          - SUCCESS
+          - REJECTION
+        created:
+          type: string
+          description: Дата и время создания заказа
+          format: date-time
+    StationResponseDto:
+      required:
+      - id
+      - stationName
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID станции
+          format: int32
+          example: 1
+        stationName:
+          type: string
+          description: Название станции
+          example: Station name
+      description: Точка прибытия
+  securitySchemes:
+    JWT токен:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
